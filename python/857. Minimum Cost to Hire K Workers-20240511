@@ -1,0 +1,49 @@
+ 
+
+Example 1:
+
+Input: quality = [10,20,5], wage = [70,50,30], k = 2
+Output: 105.00000
+Explanation: We pay 70 to 0th worker and 35 to 2nd worker.
+Example 2:
+
+Input: quality = [3,1,10,10,1], wage = [4,8,2,2,7], k = 3
+Output: 30.66667
+Explanation: We pay 4 to 0th worker, 13.33333 to 2nd and 3rd workers separately.
+
+class Solution:
+    def mincostToHireWorkers(self, quality: List[int], wage: List[int], k: int) -> float:
+        ratio = []
+        n = len(quality)
+        for i in range(n):
+            ratio.append([wage[i]/quality[i],quality[i]])
+        ratio = sorted(ratio, reverse = True)
+        quality = sorted(quality)
+        ans = inf
+        for i in range(n-k+1):
+            quality.remove(ratio[i][1])
+            res = (ratio[i][1]+sum(quality[:k-1])) * ratio[i][0]
+            ans = min(ans,res)
+        return ans
+
+class Solution:
+    def mincostToHireWorkers(self, quality: List[int], wage: List[int], k: int) -> float:
+        # sort the workers by wage/quality (minimum hourly wage),
+        # iterate through all the hourly wage levels,
+        # as we increase the hourly wave level, we will have more workers become available
+        # and we just need to pick k workers with lowest quality
+        # so we maintain a maxheap that keeps track of k lowest quality workers
+        
+        workers = sorted([(wage[i]/quality[i], quality[i]) for i in range(len(quality))])
+        heap = []
+        qsum = 0
+        ans = None
+        for i, (hourly, q) in enumerate(workers):
+            heapq.heappush(heap, -q)
+            qsum += q
+            if len(heap) > k:
+                qsum += heapq.heappop(heap)  # it's actually removing from qsum
+            if len(heap) == k:
+                if ans is None or ans > qsum*hourly:
+                    ans = qsum*hourly
+        return ans
